@@ -1,0 +1,47 @@
+version: 0.2
+# wolfgang unger 4.2018 - code project with java image - install docker
+phases:
+  install:
+    commands:
+      # variables
+      - REPOSITORY_URI=179756037397.dkr.ecr.us-east-1.amazonaws.com/test-example
+#      - TASKDEF_FILE=taskdef_nightly.json
+      - echo "Build number = ${CODEBUILD_BUILD_NUMBER}"
+      - echo $AWS_DEFAULT_REGION
+      - echo $REPOSITORY_URI
+      # installation
+  pre_build:
+    commands:
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
+  build:
+    commands:
+      #- echo Maven Build ...
+      #- mvn package
+      - echo Gradle Build
+      - chmod +x gradlew
+      - ./gradlew build
+      - #gradle build
+
+      - echo Building the Docker image...
+      - docker build -t springecsexample .
+      - docker tag springecsexample:latest $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER
+      - docker rmi -f springecsexample:latest || true
+      - docker rmi -f $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER || true
+      - echo Writing image definitions file...
+      - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER > imageDetail.json
+artifacts:
+  files:
+    - appspec.yaml
+    - imageDetail.json
+  secondary-artifacts:
+    DefinitionArtifact:
+      files:
+        - appspec.yaml
+    ImageArtifact:
+      files:
+        - imageDetail.json
