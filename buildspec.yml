@@ -23,17 +23,17 @@ phases:
       - #gradle build
 
       - echo Building the Docker image...
-      - docker build -t springecsexample .
-      - docker tag springecsexample:latest $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER
-      - docker rmi -f springecsexample:latest || true
-      - docker rmi -f $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER || true
+      - DOCKER_CONTAINER_NAME=test-example
       - echo Writing image definitions file...
-      - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER > imageDetail.json
+      - printf '[{"name":"%s", "ImageURI":"%s"}]' $DOCKER_CONTAINER_NAME $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER > imageDetail.json
 artifacts:
   files:
     - appspec.yaml
