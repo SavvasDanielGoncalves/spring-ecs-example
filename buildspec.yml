@@ -23,7 +23,7 @@ phases:
 
       - echo Building the Docker image...
       - docker build -t springecsexample .
-      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER
+      - docker tag springecsexample:latest $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER $REPOSITORY_URI:latest
   post_build:
     commands:
       - echo Build completed on `date`
