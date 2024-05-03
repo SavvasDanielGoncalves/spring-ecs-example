@@ -13,5 +13,5 @@ RUN wget https://s3.amazonaws.com/pearson-devops-public/java-17-amazon-corretto-
     mkdir -p $BASE_DIR && \
     rm -rf java-17-amazon-corretto-devel-17.0.5.8-1.x86_64.rpm
 
-#ENTRYPOINT ["java","-jar","/app/SpringECSExample.war"]
+ENTRYPOINT ["java","-jar","/app/SpringECSExample.jar"]
 
